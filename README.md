@@ -1,12 +1,12 @@
-## Movie Recommendation Algorithm
+## Sistema de Recomendação de Filmes
 
-This machine learning algorithm recommends the top 5 movies based on a given input movie. The recommendations are generated using collaborative filtering, where the algorithm looks at the movies that users with similar tastes to the input movie have also watched.
+Este algoritmo de aprendizado de máquina recomenda os 5 principais filmes com base em um determinado filme de entrada. As recomendações são geradas por meio de filtragem colaborativa, onde o algoritmo analisa os filmes que usuários com gostos semelhantes ao filme de entrada também assistiram.
 
-### Usage
+### Modo de Uso
 
-To use the movie recommendation algorithm, simply pass in the name of a movie as a command line argument. The algorithm will then return a list of the top 5 movies that are similar to the input movie.
+Para usar o algoritmo de recomendação de filmes, basta passar o nome de um filme como argumento de linha de comando. O algoritmo retornará então uma lista dos 5 principais filmes semelhantes ao filme de entrada.
 
-### Requirements:
+### Requisitos:
 
 1. Python 3.x
 2. NumPy
@@ -15,20 +15,19 @@ To use the movie recommendation algorithm, simply pass in the name of a movie as
 5. Streamlit
 
 
-### Installation
+### Instalação
 
-#### Clone the repository:
+#### Clonar o repositório:
 
 ```git clone https://github.com/iamfaisalnafis/movie-recommendation-engine.git```
 
-Install the required packages:
+Instalar as dependências:
 
 ```pip install numpy scikit-learn pandas pickle streamlit```
 
-Example
+Exemplo
 
-Here is an example of how to use the movie recommendation algorithm:
-
+Aqui está um exemplo de como usar o algoritmo de recomendação:
 
 ```
 $ python recommend.py "Toy Story"
@@ -40,5 +39,5 @@ Top 5 recommendations:
 5. Up
 ```
 
-## Contact
-If you have any questions or suggestions, please feel free to contact me at iamfaisalnafis@gmail.com.
+## Contato
+Se você tiver alguma dúvida ou sugestão, não hesite em entrar em contato conosco pelo e-mail marlomsilvacruz@gmail.com.
