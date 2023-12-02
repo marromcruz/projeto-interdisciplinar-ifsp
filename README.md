@@ -19,7 +19,7 @@ Para usar o algoritmo de recomendação de filmes, basta passar o nome de um fil
 
 #### Clonar o repositório:
 
-```git clone https://github.com/iamfaisalnafis/movie-recommendation-engine.git```
+```git clone https://github.com/marromcruz/projeto-interdisciplinar-ifsp.git```
 
 Instalar as dependências:
 
