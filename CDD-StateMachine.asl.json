@@ -1,0 +1,150 @@
+{
+  "Comment": "An example of the Amazon States Language for using batch job with pre-processing lambda",
+  "StartAt": "ListObjectsV2",
+  "TimeoutSeconds": 3600,
+  "States": {
+    "ListObjectsV2": {
+      "Type": "Task",
+      "Next": "Choice",
+      "Parameters": {
+        "Bucket": "cdd-movies"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:listObjectsV2"
+    },
+    "Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.KeyCount",
+          "NumericEquals": 0,
+          "Next": "Process raw parquet files"
+        }
+      ],
+      "Default": "Pass"
+    },
+    "Pass": {
+      "Type": "Pass",
+      "Next": "Glue DB"
+    },
+    "Glue DB": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "CREATE DATABASE if not exists movielens",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://aws-glue-assets-832968966596-us-west-2/athena/"
+        }
+      },
+      "Next": "Create tables"
+    },
+    "Create tables": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "show tables in movielens",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://aws-glue-assets-832968966596-us-west-2/athena/"
+        }
+      },
+      "Next": "Athena GetQueryResults"
+    },
+    "Athena GetQueryResults": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:getQueryResults",
+      "Parameters": {
+        "QueryExecutionId.$": "$.QueryExecution.QueryExecutionId"
+      },
+      "Next": "Choice (1)"
+    },
+    "Choice (1)": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Not": {
+            "Variable": "$.ResultSet.Rows[0].Data[0].VarCharValue",
+            "IsPresent": true
+          },
+          "Next": "Movies"
+        }
+      ],
+      "Default": "Pass (2)"
+    },
+    "Movies": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "CREATE EXTERNAL TABLE `movielens.movies_parquet`(  `movieid` bigint,   `title` string,   `genres` string)ROW FORMAT SERDE   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' STORED AS INPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'LOCATION  's3://cdd-movies/'TBLPROPERTIES (  'classification'='parquet',   'compressionType'='none',   'typeOfData'='file')",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://aws-glue-assets-832968966596-us-west-2/athena/"
+        }
+      },
+      "Next": "Ratings"
+    },
+    "Ratings": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "CREATE EXTERNAL TABLE `movielens.ratings_parquet`(  `userid` bigint,   `movieid` bigint,   `rating` double,   `__index_level_0__` bigint)ROW FORMAT SERDE   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' STORED AS INPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'LOCATION  's3://cdd-ratings/'TBLPROPERTIES (   'classification'='parquet',   'compressionType'='none',   'typeOfData'='file')",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://aws-glue-assets-832968966596-us-west-2/athena/"
+        }
+      },
+      "Next": "Tags"
+    },
+    "Tags": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "CREATE EXTERNAL TABLE `movielens.tags_parquet`(  `userid` bigint,   `movieid` bigint,   `tag` string,   `timestamp` bigint)ROW FORMAT SERDE   'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' STORED AS INPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'LOCATION  's3://cdd-tags/'TBLPROPERTIES (  'classification'='parquet',   'compressionType'='none',  'typeOfData'='file')",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://aws-glue-assets-832968966596-us-west-2/athena/"
+        }
+      },
+      "Next": "Pass (1)"
+    },
+    "Pass (1)": {
+      "Type": "Pass",
+      "End": true
+    },
+    "Pass (2)": {
+      "Type": "Pass",
+      "End": true
+    },
+    "Process raw parquet files": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-west-2:832968966596:function:cdd-new-datasourcefile:$LATEST",
+        "Payload.$": "$"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Glue StartJobRun"
+    },
+    "Glue StartJobRun": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "cdd-ratings-cleaning"
+      },
+      "Next": "Glue DB"
+    }
+  }
+}

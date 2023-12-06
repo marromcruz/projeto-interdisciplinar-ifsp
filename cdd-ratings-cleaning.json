@@ -1,0 +1,223 @@
+{
+	"jobConfig": {
+		"name": "cdd-ratings-cleaning",
+		"description": "",
+		"role": "arn:aws:iam::832968966596:role/LabRole",
+		"command": "glueetl",
+		"version": "4.0",
+		"runtime": null,
+		"workerType": "G.1X",
+		"numberOfWorkers": "5",
+		"maxCapacity": 5,
+		"maxRetries": 0,
+		"timeout": 2880,
+		"maxConcurrentRuns": 1,
+		"security": "none",
+		"scriptName": "cdd-ratings-cleaning.py",
+		"scriptLocation": "s3://aws-glue-assets-832968966596-us-west-2/scripts/",
+		"language": "python-3",
+		"spark": false,
+		"jobParameters": [],
+		"tags": [],
+		"jobMode": "NOTEBOOK_MODE",
+		"createdOn": "2023-12-06T15:15:53.838Z",
+		"developerMode": false,
+		"connectionsList": [],
+		"temporaryDirectory": "s3://aws-glue-assets-832968966596-us-west-2/temporary/",
+		"glueHiveMetastore": true,
+		"etlAutoTuning": false,
+		"pythonShellPrebuiltLibraryOption": "analytics",
+		"flexExecution": false,
+		"minFlexWorkers": null,
+		"bookmark": "",
+		"metrics": "",
+		"observabilityMetrics": "",
+		"logging": "",
+		"sparkPath": "",
+		"serverEncryption": false,
+		"pythonPath": null,
+		"dependentPath": "",
+		"referencedPath": "",
+		"etlAutoScaling": false,
+		"etlAutoTuningJobRules": "",
+		"pythonVersion": ""
+	},
+	"hasBeenSaved": false,
+	"script": "import boto3\nimport pandas as pd\nfrom io import BytesIO\nFILENAME_TO_BUCKET = {\n    'movies.parquet': 'cdd-movies',\n    'ratings.parquet': 'cdd-ratings',\n    'tags.parquet': 'cdd-tags'\n}\ns3 = boto3.client(\"s3\")\n\ns3.download_file(\n    Bucket=\"cdd-rawdata\",\n    Key=\"ratings.parquet\",\n    Filename=\"ratings.parquet\",\n)\ndf_ratings = pd.read_parquet('ratings.parquet')\ndf_ratings = df_ratings[['userId',  'movieId', 'rating']]\ndf_ratings.dtypes\ndf_ratings = df_ratings.groupby(\"movieId\").filter(lambda x: x['movieId'].count() >= 20)\ndef save_dataframe (filename, df):\n    buffer = BytesIO()\n    df.to_parquet(buffer)\n    s3_resource = boto3.resource('s3')\n    s3_resource.Object(FILENAME_TO_BUCKET[filename], filename).put(Body=buffer.getvalue())\nFILENAME_TO_BUCKET['ratings.parquet']\nsave_dataframe('ratings.parquet', df_ratings)\njob.commit()",
+	"notebook": {
+		"metadata": {
+			"kernelspec": {
+				"name": "glue_pyspark",
+				"display_name": "Glue PySpark",
+				"language": "python"
+			},
+			"language_info": {
+				"name": "Python_Glue_Session",
+				"mimetype": "text/x-python",
+				"codemirror_mode": {
+					"name": "python",
+					"version": 3
+				},
+				"pygments_lexer": "python3",
+				"file_extension": ".py"
+			}
+		},
+		"nbformat_minor": 4,
+		"nbformat": 4,
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": "# AWS Glue Studio Notebook",
+				"metadata": {
+					"editable": true,
+					"trusted": true
+				}
+			},
+			{
+				"cell_type": "code",
+				"source": "import boto3\nimport pandas as pd\nfrom io import BytesIO",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 1,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "Welcome to the Glue Interactive Sessions Kernel\nFor more information on available magic commands, please type %help in any new cell.\n\nPlease view our Getting Started page to access the most up-to-date information on the Interactive Sessions kernel: https://docs.aws.amazon.com/glue/latest/dg/interactive-sessions.html\nInstalled kernel version: 1.0.2 \nTrying to create a Glue session for the kernel.\nSession Type: glueetl\nWorker Type: G.1X\nNumber of Workers: 5\nSession ID: e55cde29-ce6c-4213-ad5e-5874a8ae1bcc\nApplying the following default arguments:\n--glue_kernel_version 1.0.2\n--enable-glue-datacatalog true\nWaiting for session e55cde29-ce6c-4213-ad5e-5874a8ae1bcc to get into ready status...\nSession e55cde29-ce6c-4213-ad5e-5874a8ae1bcc has been created.\n\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "FILENAME_TO_BUCKET = {\n    'movies.parquet': 'cdd-movies',\n    'ratings.parquet': 'cdd-ratings',\n    'tags.parquet': 'cdd-tags'\n}",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 16,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "s3 = boto3.client(\"s3\")\n\ns3.download_file(\n    Bucket=\"cdd-rawdata\",\n    Key=\"ratings.parquet\",\n    Filename=\"ratings.parquet\",\n)",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 10,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "df_ratings = pd.read_parquet('ratings.parquet')\ndf_ratings = df_ratings[['userId',  'movieId', 'rating']]",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 11,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "df_ratings.dtypes",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 12,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "userId       int64\nmovieId      int64\nrating     float64\ndtype: object\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "df_ratings = df_ratings.groupby(\"movieId\").filter(lambda x: x['movieId'].count() >= 20)",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 13,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "def save_dataframe (filename, df):\n    buffer = BytesIO()\n    df.to_parquet(buffer)\n    s3_resource = boto3.resource('s3')\n    s3_resource.Object(FILENAME_TO_BUCKET[filename], filename).put(Body=buffer.getvalue())",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 14,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "FILENAME_TO_BUCKET['ratings.parquet']",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": 18,
+				"outputs": [
+					{
+						"name": "stdout",
+						"text": "'cdd-ratings'\n",
+						"output_type": "stream"
+					}
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": "save_dataframe('ratings.parquet', df_ratings)",
+				"metadata": {
+					"trusted": true,
+					"tags": []
+				},
+				"execution_count": null,
+				"outputs": []
+			},
+			{
+				"cell_type": "code",
+				"source": "",
+				"metadata": {},
+				"execution_count": null,
+				"outputs": []
+			}
+		]
+	}
+}
