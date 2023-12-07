@@ -67,25 +67,36 @@ O desenvolvimento desse trabalho contou com o uso dos diversos serviços da AWS.
 Temos abaixo um diagrama da arquitetura utilizada durante o desenvolvimento:
 ![](readme-images/12-design-system.png)
 
-Diversos serviços foram necessários e permitiram alcançar os resultados aqui relatados.
-
-
+Durante o estágio inicial desse trabalho, utilizamos o Cloud9 para criar um ambiente de desenvolvimento e importar dados do dataset para dentro da AWS. Segue abaixo uma evidência do ambiente criado:
 ![](readme-images/04-cloud9.png)
+
+Diversos outros serviços foram necessários e permitiram alcançar os resultados aqui relatados.
+
+O serviço _Step functions_  foi utilizado como um dos serviços centrais dentro da arquitetura utilizada. Abaixo temos a definição da máquina de estado criada dentro desse serviço:
+![](readme-images/11-step-functions.png)
+
+Como podemos ver, essa máquina de estados trata do pipeline de dados. Temos passos para copiar arquivos, transformar e filtrar o arquivo de ratings, criar o catálogo de dados no AWS Glue e criar as tabelas.
+
+O S3 foi utilizado como solução para armazenamento. Diversos buckets foram criados para apoiar o desenvolvimento dos notebooks ou de funções de limpeza de dados.
 
 ![](readme-images/05-buckets.png)
 
+Fizemos uso de uma Lambda como meio de copiar aquivos entre buckets. Lambda essa que também é invocada via a step function.
 ![](readme-images/06-lambda.png)
 
+Utilizamos o Sagemaker como meio para densenvolver os notebooks de análise exploratória e o notebook do modelo de machine learning. Temos abaixo a configração do ambiente do Sagemaker:
 ![](readme-images/07-sagemaker.png)
 
+E temos também um exemplo do notebook em edição no Jupyter Lab criado via o Sagemaker:
 ![](readme-images/08-sagemaker-notebook.png)
 
+Todo o trabalho de engenharia de dados dependia da criação do catálogo de dados e das tabelas no serviço AWS Glue.
 ![](readme-images/09-glue-job.png)
 
+Por fim, temos as tabelas disponibilizadas:
 ![](readme-images/10-tables.png)
 
-![](readme-images/11-step-functions.png)
-
+O uso da AWS agregou muito ao trabalho e com certeza estimulou o aprendizado das práticas mais atuais para grandes e complexos ambientes de desenvolvimento.
 
 ## Resultados
 Entre os modelos testados, a melhor acurácia no banco de treinamento foi do NMF (RMSE=0,11), seguida no KNN (RMSE=0,50) e do SVD (RMSE=0,68). O modelo NMF foi escolhido para o refinamento de parâmetros e, ao avaliar o RMSE no banco de teste, foi observado que no banco de treinamento houve overfitting, já que o RMSE no banco de teste foi 10 vezes maior (1,12). Dado esse resultado, foi aplicado o refinamento de parâmetros usando o algoritmo SVD, que apresentou bom comportamento na validação cruzada com RMSE médio de 0,96 e desvio padrão de 0,003.
