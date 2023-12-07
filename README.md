@@ -1,9 +1,9 @@
 # Sistema de Recomendação de Filmes
 ## Projeto interdisciplinar do 2º semestre do curso de Especialização em Ciência de Dados - 2023
 
-- Juliana Luz Passos Argenton
-- Marlon xx
-- Washington xx
+- Juliana Luz Passos Argenton (CP3024547)
+- Marlon da Silva Cruz (CP3021793)
+- Washington H. C. Machado (CP3021718)
 
 ## Resumo
 Dada a disponibilidade de um número quase ilimitado de opções de filmes, sistemas de recomendação desempenham papel importante na personalização da experiência do usuário em vários tipos de plataformas e serviços online, oferecendo a ele orientação para o próximo item que atenda às suas expectativas.
