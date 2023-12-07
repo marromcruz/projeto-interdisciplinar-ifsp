@@ -61,6 +61,56 @@ Os dados estão divididos em alguns arquivos e neste trabalho foram usados os se
 - tags.csv: ID do usuário, ID do filme, tag dada pelo usuário ao filme (clássico, ficção científica, comédia etc) e data da avaliação - usado na análise descritiva.
 ![](readme-images/03.png)
 
+## Queries
+Durante o desenvolvimento do projeto executamos diversas queries que estão disponíveis na pasta queries. Abaixo um exemplo de query que trás um Ranking de Títulos de Filmes com as maiores médias de avaliação e cujo número de avaliações por usuários distintos é maior que 100. 
+
+```WITH 
+consolidado as (
+	SELECT 
+		rt.userid, rt.rating, mv.title
+	FROM 
+		ratings_parquet rt
+	JOIN 
+		movies_parquet mv
+	ON 
+		rt.movieId = mv.movieId),
+
+avaliacoes as (
+SELECT 
+	title
+   ,COUNT(DISTINCT userId) as qtd_avaliacoes
+FROM 
+	consolidado
+GROUP BY 
+	title),
+
+media_avaliacoes as (
+SELECT 
+	title
+   ,AVG(rating) as media_avaliacoes
+FROM 
+	consolidado
+GROUP BY 
+	title)
+
+SELECT 
+	av.title
+   ,av.qtd_avaliacoes
+   ,ma.media_avaliacoes
+FROM 
+	avaliacoes av
+INNER JOIN 
+	media_avaliacoes ma
+ON 
+	av.title = ma.title
+WHERE 
+	qtd_avaliacoes > 100
+ORDER BY 
+	media_avaliacoes DESC
+```
+
+![](readme-images/13-query-result.png)
+
 ## Arquitetura e Infraestrutura
 O desenvolvimento desse trabalho contou com o uso dos diversos serviços da AWS.
 
