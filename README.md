@@ -62,10 +62,32 @@ Os dados estão divididos em alguns arquivos e neste trabalho foram usados os se
 ![](readme-images/03.png)
 
 ## Arquitetura e Infraestrutura
-Xxx
+O desenvolvimento desse trabalho contou com o uso dos diversos serviços da AWS.
+
+Temos abaixo um diagrama da arquitetura utilizada durante o desenvolvimento:
+![](readme-images/12-design-system.png)
+
+Diversos serviços foram necessários e permitiram alcançar os resultados aqui relatados.
+
+
+![](readme-images/04-cloud9.png)
+
+![](readme-images/05-buckets.png)
+
+![](readme-images/06-lambda.png)
+
+![](readme-images/07-sagemaker.png)
+
+![](readme-images/08-sagemaker-notebook.png)
+
+![](readme-images/09-glue-job.png)
+
+![](readme-images/10-tables.png)
+
+![](readme-images/11-step-functions.png)
+
 
 ## Resultados
-Comentar um pouco sobre os achados na AED.
 Entre os modelos testados, a melhor acurácia no banco de treinamento foi do NMF (RMSE=0,11), seguida no KNN (RMSE=0,50) e do SVD (RMSE=0,68). O modelo NMF foi escolhido para o refinamento de parâmetros e, ao avaliar o RMSE no banco de teste, foi observado que no banco de treinamento houve overfitting, já que o RMSE no banco de teste foi 10 vezes maior (1,12). Dado esse resultado, foi aplicado o refinamento de parâmetros usando o algoritmo SVD, que apresentou bom comportamento na validação cruzada com RMSE médio de 0,96 e desvio padrão de 0,003.
 Não foi aplicado o refinamento de parâmetros no KNN, pois não temos recursos computacionais o suficiente para rodar. Porém, avaliando a acurácia com validação cruzada, sem refinamento de parâmetros, foi observado RMSE médio de 1,04 com desvio padrão de 0,004.
 
